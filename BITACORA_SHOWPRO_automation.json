@@ -1,0 +1,501 @@
+{
+  "app": "BITACORA_GENERADORES_SHOWPRO",
+  "version": "2.1.0",
+  "locale": "es-CL",
+  "timezone": "America/Santiago",
+  "dateFormat": "dd-mmm-yyyy",
+  "compatibleWith": [
+    "excel_2007_plus",
+    "google_sheets"
+  ],
+  "forbiddenFunctions": [
+    "MAXIFS",
+    "MINIFS",
+    "XLOOKUP",
+    "XMATCH",
+    "FILTER",
+    "SORT",
+    "UNIQUE",
+    "LET",
+    "LAMBDA",
+    "SEQUENCE",
+    "TEXTJOIN",
+    "AGGREGATE"
+  ],
+  "allowedFunctions": [
+    "IF",
+    "AND",
+    "OR",
+    "ISNUMBER",
+    "IFERROR",
+    "SUM",
+    "SUMIF",
+    "SUMIFS",
+    "MAX",
+    "INDEX",
+    "TODAY",
+    "MATCH"
+  ],
+  "sheets": [
+    {
+      "order": 1,
+      "name": "1_MAESTRA_Equipos",
+      "role": "master",
+      "description": "Única entrada manual de equipos. Hasta 10 generadores filas 5-14.",
+      "range": "A4:J14",
+      "headerRow": 4,
+      "dataFromRow": 5,
+      "dataToRow": 14,
+      "columns": [
+        {
+          "key": "id",
+          "col": "A",
+          "label": "ID",
+          "type": "string",
+          "required": true,
+          "pattern": "^GEN-[0-9]{2}$",
+          "example": "GEN-01"
+        },
+        {
+          "key": "nombre",
+          "col": "B",
+          "label": "Nombre Equipo",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "example": "Generador 130 kVA",
+          "feeds": [
+            "Bitácora General!C5:C504",
+            "Resumen de Equipos!A4:A13"
+          ]
+        },
+        {
+          "key": "potencia",
+          "col": "C",
+          "label": "Potencia / Capacidad",
+          "type": "string",
+          "required": false,
+          "example": "130 kVA"
+        },
+        {
+          "key": "serie",
+          "col": "D",
+          "label": "N° Serie / Patente",
+          "type": "string",
+          "required": false,
+          "example": "S/N 130-001"
+        },
+        {
+          "key": "horometro_inicial",
+          "col": "E",
+          "label": "Horómetro inicial (hrs)",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "format": "#,##0",
+          "example": 1242
+        },
+        {
+          "key": "intervalo",
+          "col": "F",
+          "label": "Intervalo servicio (hrs)",
+          "type": "number",
+          "required": true,
+          "default": 250,
+          "allowed": [
+            250,
+            500
+          ],
+          "format": "#,##0"
+        },
+        {
+          "key": "fecha_ingreso",
+          "col": "G",
+          "label": "Fecha ingreso",
+          "type": "date",
+          "required": false
+        },
+        {
+          "key": "estado",
+          "col": "H",
+          "label": "Estado",
+          "type": "enum",
+          "allowed": [
+            "Operativo",
+            "En taller",
+            "Fuera de servicio",
+            "Standby"
+          ],
+          "default": "Operativo"
+        },
+        {
+          "key": "ubicacion",
+          "col": "I",
+          "label": "Ubicación / Base",
+          "type": "string",
+          "required": false,
+          "example": "Base ShowPro"
+        },
+        {
+          "key": "obs",
+          "col": "J",
+          "label": "Observaciones",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "seed": [
+        {
+          "id": "GEN-01",
+          "nombre": "Generador 130 kVA",
+          "potencia": "130 kVA",
+          "serie": "S/N 130-001",
+          "horometro_inicial": 1242,
+          "intervalo": 250,
+          "fecha_ingreso": "2026-10-26",
+          "estado": "Operativo",
+          "ubicacion": "Base ShowPro",
+          "obs": "Equipo principal eventos grandes"
+        },
+        {
+          "id": "GEN-02",
+          "nombre": "Generador 60 kVA",
+          "potencia": "60 kVA",
+          "serie": "S/N 60-001",
+          "horometro_inicial": 832,
+          "intervalo": 250,
+          "fecha_ingreso": "2026-10-26",
+          "estado": "Operativo",
+          "ubicacion": "Base ShowPro",
+          "obs": "Respaldo / iluminación"
+        }
+      ],
+      "nextFreeSlot": {
+        "row": 7,
+        "id": "GEN-03"
+      }
+    },
+    {
+      "order": 2,
+      "name": "Bitácora General",
+      "role": "log",
+      "description": "1 fila = 1 Fecha + 1 Equipo + 1 Jornada. Columna G automática.",
+      "range": "A3:N504",
+      "headerRow": 3,
+      "dataFromRow": 5,
+      "dataToRow": 504,
+      "columns": [
+        {
+          "key": "fecha",
+          "col": "A",
+          "label": "Fecha",
+          "type": "date",
+          "required": true,
+          "format": "dd-mmm-yyyy"
+        },
+        {
+          "key": "evento",
+          "col": "B",
+          "label": "Evento / Faena / Cliente",
+          "type": "string",
+          "required": true,
+          "minLength": 3,
+          "example": "Festival ShowPro Día 1"
+        },
+        {
+          "key": "equipo",
+          "col": "C",
+          "label": "Equipo",
+          "type": "ref_master",
+          "required": true,
+          "source": "1_MAESTRA_Equipos!B5:B14"
+        },
+        {
+          "key": "jornada",
+          "col": "D",
+          "label": "Jornada / Turno",
+          "type": "enum",
+          "required": true,
+          "allowed": [
+            "Día (08:00-20:00)",
+            "Noche (20:00-02:00)",
+            "Día completo 24H",
+            "Mañana/Tarde parcial",
+            "Standby / Respaldo",
+            "Traslado / Taller"
+          ]
+        },
+        {
+          "key": "horometro_inicial",
+          "col": "E",
+          "label": "Horómetro Inicial (hrs)",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "format": "#,##0"
+        },
+        {
+          "key": "horometro_final",
+          "col": "F",
+          "label": "Horómetro Final (hrs)",
+          "type": "number",
+          "required": true,
+          "min": 0,
+          "format": "#,##0",
+          "rule": "final >= inicial"
+        },
+        {
+          "key": "horas_dia",
+          "col": "G",
+          "label": "Horas del día",
+          "type": "formula",
+          "readonly": true,
+          "format": "#,##0.0",
+          "formulaEN": "=IF(AND(E{row}<>\"\",F{row}<>\"\"),F{row}-E{row},\"\")",
+          "rule": "<=24"
+        },
+        {
+          "key": "tipo_mantencion",
+          "col": "H",
+          "label": "Tipo Mantención",
+          "type": "enum",
+          "required": true,
+          "default": "Sin intervención",
+          "allowed": [
+            "Sin intervención",
+            "Inspección Rutinaria",
+            "Preventiva",
+            "Correctiva",
+            "Emergencia"
+          ]
+        },
+        {
+          "key": "nivel_aceite",
+          "col": "I",
+          "label": "Nivel Aceite",
+          "type": "enum",
+          "allowed": [
+            "OK",
+            "Revisado",
+            "Rellenado",
+            "Cambiados",
+            "Limpiado",
+            "Requiere Cambio",
+            "Crítico"
+          ],
+          "default": "OK"
+        },
+        {
+          "key": "filtros",
+          "col": "J",
+          "label": "Filtros Aire/Combust.",
+          "type": "enum",
+          "allowed": [
+            "OK",
+            "Revisado",
+            "Rellenado",
+            "Cambiados",
+            "Limpiado",
+            "Requiere Cambio",
+            "Crítico"
+          ],
+          "default": "OK"
+        },
+        {
+          "key": "voltaje",
+          "col": "K",
+          "label": "Voltaje Batería (V)",
+          "type": "number",
+          "required": false,
+          "min": 0,
+          "max": 30,
+          "format": "0.0",
+          "example": 13.8
+        },
+        {
+          "key": "estado_bateria",
+          "col": "L",
+          "label": "Estado Batería",
+          "type": "enum",
+          "allowed": [
+            "OK",
+            "Revisado",
+            "Requiere Cambio",
+            "Crítico"
+          ],
+          "default": "OK"
+        },
+        {
+          "key": "tecnico",
+          "col": "M",
+          "label": "Técnico / Responsable",
+          "type": "string",
+          "required": true,
+          "example": "Juan Pérez"
+        },
+        {
+          "key": "observaciones",
+          "col": "N",
+          "label": "Observaciones / Trabajos Realizados",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "examples": [
+        {
+          "fecha": "2026-10-26",
+          "evento": "Evento Matrimonio Viña – Escenario Principal",
+          "equipo": "Generador 130 kVA",
+          "jornada": "Día (08:00-20:00)",
+          "horometro_inicial": 1242,
+          "horometro_final": 1250,
+          "tipo_mantencion": "Preventiva",
+          "nivel_aceite": "OK",
+          "filtros": "Cambiados",
+          "voltaje": 13.8,
+          "estado_bateria": "OK",
+          "tecnico": "Juan Pérez",
+          "observaciones": "Cambio filtro aceite y combustible. Prueba con carga OK."
+        },
+        {
+          "fecha": "2026-10-26",
+          "evento": "Evento Matrimonio Viña – Iluminación",
+          "equipo": "Generador 60 kVA",
+          "jornada": "Día (08:00-20:00)",
+          "horometro_inicial": 832,
+          "horometro_final": 840,
+          "tipo_mantencion": "Inspección Rutinaria",
+          "nivel_aceite": "Rellenado",
+          "filtros": "Revisado",
+          "voltaje": 12.6,
+          "estado_bateria": "OK",
+          "tecnico": "Carlos Soto",
+          "observaciones": "Control previo a evento. Sin novedades."
+        }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Resumen de Equipos",
+      "role": "dashboard_readonly",
+      "description": "No editar a mano. 10 filas ligadas 1:1 a Maestra.",
+      "range": "A3:H13",
+      "formulasEN": {
+        "equipo": "=IF('1_MAESTRA_Equipos'!B{masterRow}=\"\",\"\",'1_MAESTRA_Equipos'!B{masterRow})",
+        "intervalo": "=IF(A{row}=\"\",\"\",IF('1_MAESTRA_Equipos'!F{masterRow}<>\"\",'1_MAESTRA_Equipos'!F{masterRow},250))",
+        "ultima_fecha": "=IF(A{row}=\"\",\"\",IF(MAX(INDEX(('Bitácora General'!C5:C504=A{row})*'Bitácora General'!A5:A504,0))=0,\"Sin movimientos\",MAX(INDEX(('Bitácora General'!C5:C504=A{row})*'Bitácora General'!A5:A504,0))))",
+        "ultimo_horometro": "=IF(A{row}=\"\",\"\",IF(MAX(INDEX(('Bitácora General'!C5:C504=A{row})*'Bitácora General'!F5:F504,0))=0,'1_MAESTRA_Equipos'!E{masterRow},MAX(INDEX(('Bitácora General'!C5:C504=A{row})*'Bitácora General'!F5:F504,0))))",
+        "horas_30d": "=IF(A{row}=\"\",\"\",SUMIFS('Bitácora General'!G5:G504,'Bitácora General'!C5:C504,A{row},'Bitácora General'!A5:A504,\">=\"&TODAY()-30))",
+        "ultima_preventiva": "=IF(A{row}=\"\",\"\",IF(MAX(INDEX(('Bitácora General'!C5:C504=A{row})*('Bitácora General'!H5:H504=\"Preventiva\")*'Bitácora General'!F5:F504,0))=0,\"Sin registro\",MAX(INDEX(('Bitácora General'!C5:C504=A{row})*('Bitácora General'!H5:H504=\"Preventiva\")*'Bitácora General'!F5:F504,0))))",
+        "horas_desde": "=IF(A{row}=\"\",\"\",IF(C{row}=\"Sin movimientos\",0,IF(ISNUMBER(F{row}),D{row}-F{row},D{row}-'1_MAESTRA_Equipos'!E{masterRow})))",
+        "restantes": "=IF(A{row}=\"\",\"\",B{row}-G{row})"
+      }
+    }
+  ],
+  "rules": {
+    "uniqueRow": [
+      "fecha",
+      "equipo",
+      "jornada"
+    ],
+    "horometroMonotonic": "horometro_final >= horometro_inicial, y mayor o igual al último final del mismo equipo",
+    "horasDiaMax": 24,
+    "eventoRequired": true,
+    "equipoMustExistInMaster": true
+  },
+  "alerts": {
+    "horometro_invertido": {
+      "when": "F < E",
+      "level": "error",
+      "message": "Horómetro Final menor que Inicial. Corregir."
+    },
+    "servicio_vencido": {
+      "when": "restantes <= 0",
+      "level": "critical",
+      "color": "red",
+      "message": "Servicio vencido. Detener y hacer Preventiva."
+    },
+    "servicio_proximo": {
+      "when": "1 <= restantes <= 50",
+      "level": "warning",
+      "color": "yellow",
+      "message": "Programar servicio."
+    },
+    "servicio_ok": {
+      "when": "restantes > 50",
+      "level": "ok",
+      "color": "green"
+    },
+    "requiere_cambio": {
+      "when": "I/J/L in ['Requiere Cambio','Crítico']",
+      "level": "warning",
+      "message": "Revisar insumo / batería."
+    }
+  },
+  "automation": {
+    "addEquipo": {
+      "input": [
+        "nombre",
+        "potencia",
+        "serie",
+        "horometro_inicial",
+        "intervalo",
+        "fecha_ingreso",
+        "estado"
+      ],
+      "steps": [
+        "find first empty row in 1_MAESTRA_Equipos B5:B14",
+        "validate nombre unique",
+        "write row",
+        "verify appears in Resumen A column"
+      ]
+    },
+    "addRegistro": {
+      "input": [
+        "fecha",
+        "evento",
+        "equipo",
+        "jornada",
+        "horometro_inicial",
+        "horometro_final",
+        "tipo_mantencion",
+        "nivel_aceite",
+        "filtros",
+        "voltaje",
+        "estado_bateria",
+        "tecnico",
+        "observaciones"
+      ],
+      "validate": [
+        "equipo exists in master",
+        "evento non-empty",
+        "final >= inicial",
+        "horas_dia = final - inicial <= 24"
+      ],
+      "output": "append row 5..504 in Bitácora General with G auto-formula"
+    },
+    "n8n_or_appscript": {
+      "trigger": "onFormSubmit | onRowAdded | daily 08:00",
+      "actions": [
+        "validateRow",
+        "computeHorasDia",
+        "updateResumen (recalc auto)",
+        "if restantes<=50 sendEmail/WhatsApp"
+      ]
+    }
+  },
+  "claude_instructions": "Valida equipo contra Maestra. Nunca inventes horómetros. Devuelve registros en tabla A-N con G=F-E. Usa solo funciones compatibles. Español Chile.",
+  "lastAudit": "2026-10-26",
+  "fixes": [
+    "Jornada Mañana sin backslash",
+    "Resumen A7=Maestra!B8 y A12=Maestra!B13 restauradas",
+    "Code.gs getEquiposMaestra fila por fila, pintura por x.fila, guard onEdit, placeholder apikey detectado"
+  ],
+  "notifications": {
+    "email_alerta": "MILENKOILIC@GMAIL.COM",
+    "whatsapp_phone": "56922273691",
+    "whatsapp_provider": "callmebot",
+    "whatsapp_apikey_status": "pendiente_pegar",
+    "daily_check": "08:00 America/Santiago"
+  }
+}
